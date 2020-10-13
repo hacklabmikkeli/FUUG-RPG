@@ -14,6 +14,7 @@ class MonsterModel {
     }
 
     loseHealth(attackStr) {
+        console.log(attackStr)
         this.health -= attackStr; 
     }
 

@@ -1,7 +1,6 @@
 class GameScene extends Phaser.Scene {
     constructor() {
-        super('Game');
-
+        super('Game')
     }
 
 
@@ -10,7 +9,6 @@ class GameScene extends Phaser.Scene {
     }
     init() {
         this.scene.launch('Ui');
-        console.log(this.scene)
     }
 
     create() {
@@ -22,20 +20,23 @@ class GameScene extends Phaser.Scene {
         this.createMap();
         this.createGameManager();
         this.createMiniMap();
+        
     }
 
     createPlayer(playerObject) {
 
         this.player = new PlayerContainer(this,
             playerObject.x * 2,
-            playerObject.y * 2, 
+            playerObject.y * 2,
             'player',
-             4,
-             playerObject.health,
-             playerObject.maxHealth,
-             playerObject.id,
-             1
-             )
+            4,
+            playerObject.health,
+            playerObject.maxHealth,
+            playerObject.id,
+            playerObject.level,
+            playerObject.xp,
+            playerObject.attackStr
+        )
         this.player.setUpAnims();
     }
 
@@ -57,7 +58,7 @@ class GameScene extends Phaser.Scene {
 
 
     enemyOverlap(player, monster) {
-        if(this.player.playerAttacking && !this.player.swordHit) {
+        if (this.player.playerAttacking && !this.player.swordHit) {
             this.swordHit = true;
             //monster.makeInactive();
             this.events.emit('attackMonster', monster.id, this.player.id);
@@ -74,6 +75,7 @@ class GameScene extends Phaser.Scene {
         this.events.on('spawnPlayer', (playerObject) => {
             this.createPlayer(playerObject);
             this.addCollision();
+
         })
 
         this.events.on('chestSpawned', (chest) => {
@@ -85,8 +87,9 @@ class GameScene extends Phaser.Scene {
         })
 
         this.events.on('monsterKilled', (monsterId) => {
+            
             this.monsters.getChildren().forEach((monster) => {
-                if(monster.id === monsterId) {
+                if (monster.id === monsterId) {
                     monster.makeInactive();
                 }
             })
@@ -94,7 +97,7 @@ class GameScene extends Phaser.Scene {
 
         this.events.on('updateMonsterHealth', (monsterId, health) => {
             this.monsters.getChildren().forEach((monster) => {
-                if(monster.id === monsterId) {
+                if (monster.id === monsterId) {
                     monster.updateHealth(health);
                 }
             })
@@ -102,14 +105,10 @@ class GameScene extends Phaser.Scene {
 
         this.events.on('attackIndicator', (attackStr, monsterId) => {
             this.monsters.getChildren().forEach((monster) => {
-                if(monster.id === monsterId) {
+                if (monster.id === monsterId) {
                     monster.showIndicator(attackStr);
                 }
             })
-        })
-
-        this.events.on('updateScore', (playerId) => {
-
         })
 
 
@@ -134,18 +133,18 @@ class GameScene extends Phaser.Scene {
         let monster = this.monsters.getFirstDead();
         if (!monster) {
             monster = new Monster(
-                this, 
+                this,
                 monsterObject.x * 2,
                 monsterObject.y * 2,
                 'player',
                 48,
                 36,
                 monsterObject.id,
-                monsterObject.health, 
+                monsterObject.health,
                 monsterObject.maxHealth,
                 randomNumber(1, this.player.level + 5),
                 randomNumber(1, this.player.level * 5),
-                );
+            );
             this.monsters.add(monster);
         } else {
             monster.id = monsterObject.id;
@@ -179,7 +178,7 @@ class GameScene extends Phaser.Scene {
         this.minimap.scrollX = 1600;
         this.minimap.scrollY = 300;
         this.minimap.visible = false;
-        this.cameras.cameras[1].setBounds(0,0, this.map.widthInPixels, this.map.heightInPixels)
+        this.cameras.cameras[1].setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
     }
 
 }

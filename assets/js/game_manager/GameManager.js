@@ -20,12 +20,14 @@ class GameManager {
         this.setupEventListeners();
         this.setupSpawners();
         this.spawnPlayer();
+        
     }
 
     spawnPlayer() {
         const player = new PlayerModel(this.playerLocations);
         this.players[player.id] = player;
         this.scene.events.emit('spawnPlayer', player);
+        
     }
 
     setupSpawners() {
@@ -88,10 +90,12 @@ class GameManager {
             }
         })
         this.scene.events.on('attackMonster', (monsterId, playerId) => {
+            
             if (this.monsters[monsterId]) {
-                let attackStr = randomNumber(0, 5);
+                let attackStr = this.players[playerId].attackStr
                 this.monsters[monsterId].loseHealth(attackStr);
                 this.scene.events.emit('attackIndicator', attackStr, monsterId);
+                console.log(this.monsters[monsterId].health)
                 if (this.monsters[monsterId].health <= 0) {
                     const { gold } = this.monsters[monsterId];
                     this.players[playerId].updateGold(gold);
@@ -99,7 +103,6 @@ class GameManager {
                     this.scene.events.emit('monsterKilled', monsterId);
                     this.players[playerId].updateLevel(this.monsters[monsterId].xpDropped);
                     this.scene.events.emit('updateScore', this.players[playerId]);
-                    
                 } else {
                     this.scene.events.emit('updateMonsterHealth', monsterId, this.monsters[monsterId].health);
                 }

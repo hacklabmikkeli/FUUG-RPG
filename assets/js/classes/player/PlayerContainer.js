@@ -8,7 +8,7 @@ const Direction = {
 
 
 class PlayerContainer extends Phaser.GameObjects.Container {
-    constructor(scene, x, y, key, frame, health, maxHealth, id, level) {
+    constructor(scene, x, y, key, frame, health, maxHealth, id, level, xp, attackStr) {
         super(scene, x, y);
 
         this.setUpAnims()
@@ -22,6 +22,7 @@ class PlayerContainer extends Phaser.GameObjects.Container {
         this.maxHealth = maxHealth;
         this.id = id;
         this.level = level;
+        this.nextLvl = 100;
 
         this.scene.physics.world.enable(this);
         this.body.setCollideWorldBounds(true);
@@ -32,21 +33,23 @@ class PlayerContainer extends Phaser.GameObjects.Container {
         this.player = new Player(this.scene, 0, 0, key, frame);
         this.add(this.player);
 
-        this.weapon = this.scene.add.image(-17, 0, 'sword');
+        this.weapon = this.scene.add.image(1, 25, 'sword');
+        this.weapon.setAngle(-135)
         this.scene.add.existing(this.weapon);
         this.weapon.setScale(0.5);
-        this.scene.physics.world.enable(this.weapon)
+        this.scene.physics.world.enable(this.weapon);
+        this.weapon.body.ignoreGravity = true;
         this.add(this.weapon);
         this.weapon.alpha = 0;
         this.miniMapActive = false;
+        this.attackStr = attackStr;
+        this.xp = xp;     
     }
 
 
     update(cursors, keys) {
 
         this.body.setVelocity(0);
-
-
         if (Phaser.Input.Keyboard.JustDown(keys.M)) {
             if (!this.miniMapActive) {
                 this.scene.cameras.cameras[1].visible = true;
@@ -76,14 +79,14 @@ class PlayerContainer extends Phaser.GameObjects.Container {
             if (!this.player.anims.isPlaying) this.player.anims.play('up')
             this.body.setVelocityY(-this.velocity);
             this.currentDirection = Direction.UP;
-            this.weapon.setPosition(17, -20)
+            this.weapon.setPosition(-1, -30)
 
         } else if (cursors.down.isDown || keys.S.isDown) {
             if (!this.player.anims.getCurrentKey() === 'up') this.player.anims.stop()
             if (!this.player.anims.isPlaying) this.player.anims.play('down')
             this.body.setVelocityY(this.velocity);
             this.currentDirection = Direction.DOWN;
-            this.weapon.setPosition(-17, 20)
+            this.weapon.setPosition(1, 30)
         }
 
         if (Phaser.Input.Keyboard.JustDown(cursors.space) && !this.playerAttacking) {
@@ -94,17 +97,19 @@ class PlayerContainer extends Phaser.GameObjects.Container {
                 this.playerAttacking = false;
                 this.swordHit = false;
             }, [], this)
+            this.weapon.angle +=10
         }
         if (this.playerAttacking) {
             if (this.currentDirection === Direction.DOWN) {
-                this.weapon.setAngle(-90)
+                this.weapon.setAngle(-135)
             } else if (this.currentDirection === Direction.UP) {
-                this.weapon.setAngle(-270)
+                this.weapon.setAngle(45)
             } else if (this.currentDirection === Direction.LEFT) {
-                this.weapon.setAngle(0)
+                this.weapon.setAngle(-45)
             } else if (this.currentDirection === Direction.RIGTH) {
-                this.weapon.setAngle(90)
+                this.weapon.setAngle(135)
             }
+            
         }
         this.scene.cameras.cameras[1].scrollX = this.player.body.x
         this.scene.cameras.cameras[1].scrollY = this.player.body.y
